@@ -151,6 +151,15 @@
                 <button class="btn btn-rose btn-sm" onclick="testPayload(1500)">Send 1.5MB (Block)</button>
               </div>
             </div>
+
+            <!-- Canary Traffic Splitting -->
+            <div class="action-box">
+              <div class="action-info">
+                <h4>Canary Traffic Splitting</h4>
+                <p>Verify weighted routing (90% stable Service A vs 10% Canary). Sends 20 requests to <code>/service-a</code> and displays the visual distribution.</p>
+              </div>
+              <button class="btn btn-primary" onclick="testCanarySplit()">Run Canary Split Test</button>
+            </div>
           </div>
         </div>
 

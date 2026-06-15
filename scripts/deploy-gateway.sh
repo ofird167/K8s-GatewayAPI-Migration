@@ -15,6 +15,9 @@ kubectl apply -f "${PROJECT_ROOT}/manifests/gateway-after/gatewayclass.yaml"
 echo "Applying Gateway..."
 kubectl apply -f "${PROJECT_ROOT}/manifests/gateway-after/gateway.yaml"
 
+echo "Deploying Service A Canary..."
+kubectl apply -f "${PROJECT_ROOT}/manifests/gateway-after/service-a-canary.yaml"
+
 echo "Applying HTTPRoute redirects (HTTP to HTTPS)..."
 kubectl apply -f "${PROJECT_ROOT}/manifests/gateway-after/httproute-http.yaml"
 

@@ -50,6 +50,9 @@ Deploy both routing layers side-by-side:
 # Deploy Envoy Gateway rules
 ./scripts/setup-gateway.sh
 ./scripts/deploy-gateway.sh
+
+# Rollback to NGINX Ingress (if needed)
+./scripts/rollback.sh
 ```
 
 ---

@@ -24,6 +24,10 @@ spec:
       backendRefs:
         - name: service-a
           port: 80
+          weight: 90
+        - name: service-a-canary
+          port: 80
+          weight: 10
     # Route for service-b (prefix strip)
     - matches:
         - path:

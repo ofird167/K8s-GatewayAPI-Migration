@@ -121,7 +121,26 @@ We supply an automated verification script to validate URL prefix rewrites, SSL 
 
 ---
 
-## 6. Incident Runbook & Troubleshooting
+## 6. Observability (Metrics & Tracing)
+
+Envoy Gateway has built-in support for exporting Prometheus metrics. 
+
+### Accessing Envoy Admin & Prometheus Metrics
+To query the Envoy proxy metrics directly from your local environment:
+1. Port-forward the Envoy Admin port (19001) to your host:
+   ```bash
+   ENVOY_POD=$(kubectl get pod -n envoy-gateway-system -l app.kubernetes.io/name=envoy -o jsonpath='{.items[0].metadata.name}')
+   kubectl port-forward $ENVOY_POD -n envoy-gateway-system 19001:19001 --address=0.0.0.0
+   ```
+2. Retrieve the raw Prometheus metrics:
+   ```bash
+   curl http://127.0.0.1:19001/stats/prometheus
+   ```
+3. These metrics can be scraped by Prometheus and visualized in Grafana to monitor traffic splitting and routing performance.
+
+---
+
+## 7. Incident Runbook & Troubleshooting
 
 ### Incident A: Vault Secret Injection Fails (Pod Blocks on InitContainer)
 If pods fail to start and show `Init:CrashLoopBackOff`:

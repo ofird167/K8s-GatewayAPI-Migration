@@ -195,6 +195,56 @@ async function testPayload(sizeKb) {
   }
 }
 
+// Verification Test: Canary Traffic Splitting
+async function testCanarySplit() {
+  logToConsole('Testing Canary Traffic Splitting (Sending 20 requests to /service-a)...', 'header');
+  
+  let stableCount = 0;
+  let canaryCount = 0;
+  let errors = 0;
+  
+  // Make 20 calls to /service-a
+  for (let i = 1; i <= 20; i++) {
+    try {
+      const response = await fetch('/service-a');
+      if (response.ok) {
+        const data = await response.json();
+        const hostname = data.hostname || '';
+        
+        if (hostname.includes('canary')) {
+          canaryCount++;
+          logToConsole(`Request ${i}: Routed to Canary [${hostname}]`, 'warning');
+        } else {
+          stableCount++;
+          logToConsole(`Request ${i}: Routed to Stable [${hostname}]`, 'success');
+        }
+      } else {
+        errors++;
+        logToConsole(`Request ${i}: Failed with status ${response.status}`, 'error');
+      }
+    } catch (err) {
+      errors++;
+      logToConsole(`Request ${i}: Network error: ${err.message}`, 'error');
+    }
+    // Small sleep to spread requests slightly
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  
+  // Render results summary with horizontal bar chart
+  logToConsole('=== Canary Split Test Summary ===', 'header');
+  const stablePercent = ((stableCount / 20) * 100).toFixed(1);
+  const canaryPercent = ((canaryCount / 20) * 100).toFixed(1);
+  
+  const stableBar = '█'.repeat(Math.round(stableCount / 2)) + '░'.repeat(10 - Math.round(stableCount / 2));
+  const canaryBar = '█'.repeat(Math.round(canaryCount / 2)) + '░'.repeat(10 - Math.round(canaryCount / 2));
+  
+  logToConsole(`Stable Version (90% target): ${stableCount}/20 requests (${stablePercent}%) [${stableBar}]`, 'success');
+  logToConsole(`Canary Version (10% target): ${canaryCount}/20 requests (${canaryPercent}%) [${canaryBar}]`, 'warning');
+  if (errors > 0) {
+    logToConsole(`Failed Requests: ${errors}`, 'error');
+  }
+}
+
 // Auto-run on page load
 window.addEventListener('DOMContentLoaded', () => {
   // Run initial controller detection based on port/headers

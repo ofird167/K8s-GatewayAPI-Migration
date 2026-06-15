@@ -1,0 +1,47 @@
+name: DevOps Migration CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-validate:
+    name: Lint Scripts & Validate Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Lint Shell Scripts
+        run: |
+          echo "Linting all shell scripts..."
+          shellcheck scripts/*.sh
+
+      - name: Render YAML Manifests (Dry-run Setup)
+        run: |
+          echo "Creating mock environment file..."
+          mkdir -p secrets
+          echo "MINIKUBE_CPU=2" > secrets/.env
+          echo "MINIKUBE_MEMORY=2048" >> secrets/.env
+          echo "DOCKER_REGISTRY=docker.io/test" >> secrets/.env
+          echo "DOCKER_USERNAME=test" >> secrets/.env
+          echo "DOCKER_PASSWORD=test" >> secrets/.env
+          echo "INGRESS_DOMAIN=ingress-test.local" >> secrets/.env
+          
+          echo "Running template renderer..."
+          chmod +x scripts/render-manifests.sh
+          ./scripts/render-manifests.sh
+
+      - name: Validate YAML Syntax
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: manifests/
+          config_file: .yamllint.yml
+          strict: false
+        continue-on-error: true # Keep soft check for warnings
