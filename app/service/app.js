@@ -42,8 +42,8 @@ const server = http.createServer((req, res) => {
   // Mask secrets for display
   const mask = (val) => {
     if (!val || val === 'Not Loaded') return val;
-    if (val.length <= 4) return '****';
-    return val.substring(0, 2) + '*'.repeat(val.length - 4) + val.substring(val.length - 2);
+    if (val.length <= 2) return '**';
+    return val.substring(0, 1) + '*'.repeat(val.length - 2) + val.substring(val.length - 1);
   };
 
   const responseData = {
