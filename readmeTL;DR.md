@@ -62,7 +62,7 @@ Deploy both routing layers side-by-side:
    kubectl port-forward svc/ingress-nginx-controller -n ingress-nginx 8443:443 --address=0.0.0.0 &
 
    # Envoy Gateway
-   ENVOY_SVC=$(kubectl get svc -n envoy-gateway-system -l gateway.envoyproxy.io/infra-name=devops-gateway -o jsonpath='{.items[0].metadata.name}')
+   ENVOY_SVC=$(kubectl get svc -n envoy-gateway-system -l gateway.envoyproxy.io/owning-gateway-name=devops-gateway -o jsonpath='{.items[0].metadata.name}')
    kubectl port-forward svc/$ENVOY_SVC -n envoy-gateway-system 8086:80 --address=0.0.0.0 &
    kubectl port-forward svc/$ENVOY_SVC -n envoy-gateway-system 8446:443 --address=0.0.0.0 &
    ```
