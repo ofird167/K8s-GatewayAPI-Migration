@@ -1,0 +1,31 @@
+# Secrets and local environment configs
+secrets/
+.env
+
+# Logs
+logs/
+
+# Terraform local state and files
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+_override.tf
+_override.tf.json
+.terraformrc
+terraform.rc
+
+# OS/Editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Binary tools
+bin/
+
+# Generated Kubernetes Manifests
+manifests/**/*.yaml
+!manifests/**/*.tmpl

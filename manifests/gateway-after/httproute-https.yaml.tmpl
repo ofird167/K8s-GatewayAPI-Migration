@@ -1,0 +1,62 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: route-https
+  namespace: devops
+spec:
+  parentRefs:
+    - name: devops-gateway
+      port: 443
+  hostnames:
+    - "${INGRESS_DOMAIN}"
+  rules:
+    # Route for service-a (prefix strip using ReplacePrefixMatch)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /service-a
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: service-a
+          port: 80
+    # Route for service-b (prefix strip)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /service-b
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: service-b
+          port: 80
+    # Route for service-c (prefix strip)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /service-c
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: service-c
+          port: 80
+    # Route for frontend (fallback to root)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend
+          port: 80

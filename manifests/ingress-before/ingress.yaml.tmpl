@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: devops-ingress
+  namespace: devops
+  annotations:
+    # NGINX Ingress Controller annotations
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "1m"
+spec:
+  tls:
+    - hosts:
+        - ${INGRESS_DOMAIN}
+      secretName: ingress-tls
+  rules:
+    - host: ${INGRESS_DOMAIN}
+      http:
+        paths:
+          - path: /service-a/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: service-a
+                port:
+                  number: 80
+          - path: /service-b/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: service-b
+                port:
+                  number: 80
+          - path: /service-c/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: service-c
+                port:
+                  number: 80
+          - path: /?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

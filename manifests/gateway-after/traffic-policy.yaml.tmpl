@@ -1,0 +1,12 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: limit-request-body
+  namespace: devops
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: route-https
+  requestBuffer:
+    limit: 1Mi

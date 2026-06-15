@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: devops-gateway
+  namespace: devops
+spec:
+  gatewayClassName: eg
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "${INGRESS_DOMAIN}"
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "${INGRESS_DOMAIN}"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: ingress-tls
+      allowedRoutes:
+        namespaces:
+          from: Same

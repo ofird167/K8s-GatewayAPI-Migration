@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes Gateway API Migration Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-sphere glow-blue"></div>
+    <div class="glow-sphere glow-emerald"></div>
+  </div>
+
+  <div class="dashboard-wrapper">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="header-title">
+        <span class="badge">Local Environment</span>
+        <h1>K8s Ingress to Gateway API Migration</h1>
+        <p class="subtitle">Real-time status monitoring, routing validation, and HashiCorp Vault secrets integration.</p>
+      </div>
+      <div class="cluster-status-panel">
+        <div class="status-indicator">
+          <span class="pulse-dot emerald"></span>
+          <span class="status-label">Cluster: <strong>Minikube</strong></span>
+        </div>
+        <div class="active-controller-badge" id="active-controller">
+          <span class="controller-icon">⚡</span>
+          <span id="controller-name">Detecting Controller...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Left Column: Services & Vault Status -->
+      <section class="grid-col left-col">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>Microservices Status</h2>
+            <button class="btn btn-sm btn-secondary" onclick="refreshAllStatuses()">Refresh All</button>
+          </div>
+          <div class="services-list">
+            <!-- Service A -->
+            <div class="service-row" id="row-service-a">
+              <div class="service-info">
+                <h3>Service A</h3>
+                <span class="route-path">Path: <code>/service-a</code></span>
+              </div>
+              <div class="service-meta">
+                <span class="hostname" id="host-service-a">-</span>
+                <span class="status-tag status-offline" id="status-service-a">OFFLINE</span>
+              </div>
+            </div>
+            <!-- Service B -->
+            <div class="service-row" id="row-service-b">
+              <div class="service-info">
+                <h3>Service B</h3>
+                <span class="route-path">Path: <code>/service-b</code></span>
+              </div>
+              <div class="service-meta">
+                <span class="hostname" id="host-service-b">-</span>
+                <span class="status-tag status-offline" id="status-service-b">OFFLINE</span>
+              </div>
+            </div>
+            <!-- Service C -->
+            <div class="service-row" id="row-service-c">
+              <div class="service-info">
+                <h3>Service C</h3>
+                <span class="route-path">Path: <code>/service-c</code></span>
+              </div>
+              <div class="service-meta">
+                <span class="hostname" id="host-service-c">-</span>
+                <span class="status-tag status-offline" id="status-service-c">OFFLINE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HashiCorp Vault Status -->
+        <div class="card glass-card vault-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <span class="icon">🔒</span>
+              <h2>Vault Integration</h2>
+            </div>
+            <span class="status-tag status-warning" id="vault-connection-status">CHECKING</span>
+          </div>
+          <div class="vault-details">
+            <p>Secrets injected via <strong>Vault Agent Mutating Webhook</strong> into pod volumes.</p>
+            <div class="secret-display-grid">
+              <div class="secret-item">
+                <span class="secret-label">Docker Username</span>
+                <span class="secret-value" id="secret-user">Not Loaded</span>
+              </div>
+              <div class="secret-item">
+                <span class="secret-label">Docker Password</span>
+                <span class="secret-value masked" id="secret-pass">••••••••••••</span>
+              </div>
+              <div class="secret-item">
+                <span class="secret-label">API Key</span>
+                <span class="secret-value masked" id="secret-key">••••••••••••</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Verification & Response Inspector -->
+      <section class="grid-col right-col">
+        <div class="card glass-card">
+          <div class="card-header">
+            <h2>Annotation Verification Playground</h2>
+          </div>
+          <div class="playground-description">
+            <p>Verify that Ingress/Gateway API controllers correctly process specific traffic directives.</p>
+          </div>
+          <div class="playground-actions">
+            <!-- Rewrite Test -->
+            <div class="action-box">
+              <div class="action-info">
+                <h4>URL Rewrite Target</h4>
+                <p>Verify that <code>/service-a/check-rewrite</code> rewrites path to <code>/check-rewrite</code> (removes service prefix).</p>
+              </div>
+              <button class="btn btn-primary" onclick="testRewrite()">Test Rewrite</button>
+            </div>
+
+            <!-- SSL Redirect -->
+            <div class="action-box">
+              <div class="action-info">
+                <h4>SSL Enforcement</h4>
+                <p>Verify that HTTP requests force a redirect to HTTPS (301/308).</p>
+              </div>
+              <button class="btn btn-primary" onclick="testSSLRedirect()">Test SSL Redirect</button>
+            </div>
+
+            <!-- Proxy Body Size -->
+            <div class="action-box">
+              <div class="action-info">
+                <h4>Payload Size Limits</h4>
+                <p>Test limit (configured to max 1MB). Large payloads must return 413 Payload Too Large.</p>
+              </div>
+              <div class="payload-buttons">
+                <button class="btn btn-secondary btn-sm" onclick="testPayload(50)">Send 50KB (OK)</button>
+                <button class="btn btn-rose btn-sm" onclick="testPayload(1500)">Send 1.5MB (Block)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Console / Response Inspector -->
+        <div class="card glass-card console-card">
+          <div class="card-header">
+            <div class="title-with-icon">
+              <span class="console-icon">$_</span>
+              <h2>Response Inspector</h2>
+            </div>
+            <button class="btn btn-sm btn-link" onclick="clearConsole()">Clear</button>
+          </div>
+          <div class="console-body">
+            <pre id="console-output">Select a test from the playground or click Refresh to fetch live cluster metadata...</pre>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="dashboard-footer">
+      <p>DevOps Kubernetes Gateway API Migration Demo • Created dynamically for validation</p>
+    </footer>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
