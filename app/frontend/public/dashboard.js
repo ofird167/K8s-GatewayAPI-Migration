@@ -27,22 +27,37 @@ function clearConsole() {
   document.getElementById('console-output').innerHTML = '';
 }
 
-// Check active gateway controller by reading response headers
+// Check active gateway controller by reading response headers or URL port
 function detectController(headers) {
   const controllerEl = document.getElementById('active-controller');
   const controllerNameEl = document.getElementById('controller-name');
   
-  let serverHeader = headers.get('server') || '';
-  let envoyTimeHeader = headers.get('x-envoy-upstream-service-time');
-  
-  if (serverHeader.toLowerCase().includes('nginx') || serverHeader.toLowerCase().includes('openresty')) {
+  // Try port-based detection first (very reliable for local forwarding ports)
+  const port = window.location.port;
+  if (port === '8085' || port === '8443') {
     controllerEl.className = 'active-controller-badge nginx';
     controllerNameEl.textContent = 'Active: NGINX Ingress Controller';
     return 'nginx';
-  } else if (serverHeader.toLowerCase().includes('envoy') || envoyTimeHeader !== null) {
+  } else if (port === '8086' || port === '8446') {
     controllerEl.className = 'active-controller-badge envoy';
     controllerNameEl.textContent = 'Active: Envoy Gateway (Gateway API)';
     return 'envoy';
+  }
+
+  // Fallback to response headers if ports don't match standard local ports
+  if (headers) {
+    let serverHeader = headers.get('server') || '';
+    let envoyTimeHeader = headers.get('x-envoy-upstream-service-time');
+    
+    if (serverHeader.toLowerCase().includes('nginx') || serverHeader.toLowerCase().includes('openresty')) {
+      controllerEl.className = 'active-controller-badge nginx';
+      controllerNameEl.textContent = 'Active: NGINX Ingress Controller';
+      return 'nginx';
+    } else if (serverHeader.toLowerCase().includes('envoy') || envoyTimeHeader !== null) {
+      controllerEl.className = 'active-controller-badge envoy';
+      controllerNameEl.textContent = 'Active: Envoy Gateway (Gateway API)';
+      return 'envoy';
+    }
   }
   return 'unknown';
 }
@@ -182,6 +197,8 @@ async function testPayload(sizeKb) {
 
 // Auto-run on page load
 window.addEventListener('DOMContentLoaded', () => {
+  // Run initial controller detection based on port/headers
+  detectController();
   // Wait a short duration to let initial layout render
   setTimeout(refreshAllStatuses, 1000);
 });
