@@ -14,7 +14,7 @@ elif [ -f "${PROJECT_ROOT}/example.env" ]; then
 fi
 
 # Fallbacks for variables
-export DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io/devops-user}"
+export DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io/ofird167}"
 export INGRESS_DOMAIN="${INGRESS_DOMAIN:-ingress-test.local}"
 
 echo "Rendering templates with DOCKER_REGISTRY=${DOCKER_REGISTRY} and INGRESS_DOMAIN=${INGRESS_DOMAIN}..."
